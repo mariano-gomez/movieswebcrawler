@@ -29,79 +29,83 @@ for($pagina=1;$pagina<=$paginas; $pagina++) {
 	$i = 0;
 	foreach($htmlCompleto->find('div[class=pelicula]') as $divPelicula) {
 		if($i== 0) {
-			
-		
-		//	Info del listado
-		echo utf8_decode($divPelicula->find('h2', 0)->find('a', 0)->innertext);	//	Titulo argentino, sin link
-		echo "<br/>";
-		echo utf8_decode($divPelicula->find('h2', 0)->find('a', 0)->href);		//	link (relativo)
-		echo "<br/>";
-		$ambosTitulos = utf8_decode($divPelicula->find('h2', 0)->plaintext);				//	El titulo completo bilingue (sin link)
-		list($titulo, $title) = preg_split("#\(#", $ambosTitulos, 2);
-		echo $titulo . " " . substr($title, 0, -1);
-		echo "<br/>";
-		echo "---------------";
-		
-		/*******************/
-		//	Info del detalle de la pelicula
-		$urlDetalle = 'http://www.cinesargentinos.com.ar' .  $divPelicula->find('h2', 0)->find('a', 0)->href . "datoscompletos";	//	armo la url del detalle de la pelicula
-		$htmlPeliculaCompleto = file_get_html($urlDetalle);
-		
-		$peliculaDatosCompletos = $htmlPeliculaCompleto->find('div[class=PeliculaDatosCompletos]');
-		echo $htmlPeliculaCompleto->find('div[class=PeliculaDatosCompletos]')->plaintext;
-		
-		$htmlPeliculaCompleto->dump();
-		
-		/*
-		$sinopsis = utf8_decode($peliculaDatosCompletos->find('div[class=Sinopsis]')->plaintext);
-		echo $sinopsis;
-		
+			//	Info del listado
+			echo utf8_decode($divPelicula->find('h2', 0)->find('a', 0)->innertext);	//	Titulo argentino, sin link
+			echo "<br/>";
+			echo utf8_decode($divPelicula->find('h2', 0)->find('a', 0)->href);		//	link (relativo)
+			echo "<br/>";
+			$ambosTitulos = utf8_decode($divPelicula->find('h2', 0)->plaintext);				//	El titulo completo bilingue (sin link)
+			list($titulo, $title) = preg_split("#\(#", $ambosTitulos, 2);
+			echo $titulo . " " . substr($title, 0, -1);
+			echo "<br/>";
 
-		
-		/*
-		$sinopsis = utf8_decode($peliculaDatosCompletos->find('p[class=Sinopsis]')->plaintext);
-		$detallesPelicula = $peliculaDatosCompletos->find('p[class=Texto]');
-		$reparto = utf8_decode($detallesPelicula->children(3)->plaintext);
-		$repartoSecundario = utf8_decode($detallesPelicula->children(4)->plaintext);
-		$directores = utf8_decode($detallesPelicula->children(5)->plaintext);
-		$fotografia = utf8_decode($detallesPelicula->children(6)->plaintext);
-		$guion = utf8_decode($detallesPelicula->children(7)->plaintext);
-		$musica = utf8_decode($detallesPelicula->children(8)->plaintext);
-		$genero = utf8_decode($detallesPelicula->children(9)->plaintext);
-		$duracion = utf8_decode($detallesPelicula->children(10)->plaintext);
-		$calificacion = utf8_decode($detallesPelicula->children(11)->plaintext);
-		$estrenoBaires = utf8_decode($detallesPelicula->children(16)->plaintext);
-		$estrenoCba = utf8_decode($detallesPelicula->children(26)->plaintext);
-		$estrenoUSA = utf8_decode($detallesPelicula->children(27)->plaintext);
-		
-		echo $sinopsis;
-		echo "<br/>";
-		echo $reparto;
-		echo "<br/>";
-		echo $repartoSecundario;
-		echo "<br/>";
-		echo $directores;
-		echo "<br/>";
-		echo $fotografia;
-		echo "<br/>";
-		echo $guion;
-		echo "<br/>";
-		echo $musica;
-		echo "<br/>";
-		echo $genero;
-		echo "<br/>";
-		echo $duracion;
-		echo "<br/>";
-		echo $calificacion;
-		echo "<br/>";
-		echo $estrenoBaires;
-		echo "<br/>";
-		echo $estrenoCba;
-		echo "<br/>";
-		echo $estrenoUSA;
-		echo "<br/>";
-		 */
-		echo "===================";
+			$fechaEstreno = $divPelicula->find('span[class=def]', 0);
+			echo $fechaEstreno;
+			echo "<br/>";
+			echo "---------------";
+			echo "<br/>";
+
+			/*******************/
+			//	Info del detalle de la pelicula
+			$urlDetalle = 'http://www.cinesargentinos.com.ar' .  $divPelicula->find('h2', 0)->find('a', 0)->href . "datoscompletos";	//	armo la url del detalle de la pelicula
+			$htmlPeliculaCompleto = file_get_html($urlDetalle);
+
+			
+			
+			//	$peliculaDatosCompletos = $htmlPeliculaCompleto->find('div[class=PeliculaDatosCompletos]');
+			$sinopsis			= utf8_decode($htmlPeliculaCompleto->find('p[class=Sinopsis]', 0));	//	Esto anda
+			$infoCruda			= utf8_decode($htmlPeliculaCompleto->find('div[class=PeliculaDatosCompletos]', 0));	//	Esto anda
+			
+			$infoSinParagraphTag	= preg_replace('#\<p class\=\"Texto\">#', '', $infoCruda);
+			$infoSinParagraphTag	= preg_replace('#\<\/p\>#', '<br/>', $infoSinParagraphTag);
+			$infoConSoloBRs			= strip_tags($infoSinParagraphTag, "<br>");
+//			echo $infoConSoloBRs;
+			echo "<br/>";
+			
+			$reparto			= preg_grep('#ACTORES:(.)+ \.#', $infoConSoloBRs);
+			echo $reparto;
+/*			$reparto			= utf8_decode($htmlPeliculaCompleto->find('p[class=Texto]', 3));
+			$repartoSecundario	= utf8_decode($htmlPeliculaCompleto->find('p[class=Texto]', 4));
+			$directores			= utf8_decode($htmlPeliculaCompleto->find('p[class=Texto]', 5));
+			$fotografia			= utf8_decode($htmlPeliculaCompleto->find('p[class=Texto]', 6));
+			$guion				= utf8_decode($htmlPeliculaCompleto->find('p[class=Texto]', 7));
+			$musica				= utf8_decode($htmlPeliculaCompleto->find('p[class=Texto]', 8));
+			$genero				= utf8_decode($htmlPeliculaCompleto->find('p[class=Texto]', 9));
+			$duracion			= utf8_decode($htmlPeliculaCompleto->find('p[class=Texto]', 10));
+			$calificacion		= utf8_decode($htmlPeliculaCompleto->find('p[class=Texto]', 11));
+			$estrenoBaires		= utf8_decode($htmlPeliculaCompleto->find('p[class=Texto]', 16));
+			$estrenoCba			= utf8_decode($htmlPeliculaCompleto->find('p[class=Texto]', 26));
+			$estrenoUSA			= utf8_decode($htmlPeliculaCompleto->find('p[class=Texto]', 27));
+
+			echo $sinopsis;
+			echo "<br/>";
+			echo $reparto;
+			echo "<br/>";
+			echo $repartoSecundario;
+			echo "<br/>";
+			echo $directores;
+			echo "<br/>";
+			echo $fotografia;
+			echo "<br/>";
+			echo $guion;
+			echo "<br/>";
+			echo $musica;
+			echo "<br/>";
+			echo $genero;
+			echo "<br/>";
+			echo $duracion;
+			echo "<br/>";
+			echo $calificacion;
+			echo "<br/>";
+			echo $estrenoBaires;
+			echo "<br/>";
+			echo $estrenoCba;
+			echo "<br/>";
+			echo $estrenoUSA;
+			echo "<br/>";
+			 /**/
+			echo "===================";
+			echo "<br/>";
 		}
 		$i++;
 	}
